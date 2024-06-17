@@ -2,6 +2,8 @@ from flask import Flask, request
 import requests
 from flask import send_file
 from openai import OpenAI
+from dotenv import load_dotenv
+import os
 
 
 def download_file(url, local_filename):
@@ -43,7 +45,11 @@ def dalle3():
 
     image_url = response.data[0].url
     download_file(image_url, "dalle_img.png")
-    return f"Running Dall E 3, url: {image_url}"
+#    return image_url 
+#    with open("./dalle_img.png", 'wb') as file:
+#        file.write(response.content)
+    return send_file('dalle_img.png')
+#    return f"Running Dall E 3, url: {image_url}"
 
 @app.route("/")
 def stable():
@@ -69,10 +75,10 @@ def stable():
 
     with open("./corgi.jpg", 'wb') as file:
         file.write(response.content)
-#    return prompt_arg
     return send_file('corgi.jpg')
 
 if __name__ == "__main__":
+    load_dotenv()
     app.run()
 
 
