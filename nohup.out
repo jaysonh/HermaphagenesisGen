@@ -1,0 +1,8 @@
+  File "/home/ubuntu/gen_apps/hello.py", line 57
+    @app.route("/stable")
+    ^
+IndentationError: expected an indented block after function definition on line 55
+  File "/home/ubuntu/gen_apps/hello.py", line 57
+    @app.route("/stable")
+    ^
+IndentationError: expected an indented block after function definition on line 55

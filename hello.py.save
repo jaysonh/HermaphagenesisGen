@@ -51,8 +51,10 @@ def dalle3():
     return send_file('dalle_img.png')
 #    return f"Running Dall E 3, url: {image_url}"
 
-#@app.route("/test")
-#def testing():
+@app.route("/test")
+def testing():
+     
+    return "testing"
 
 @app.route("/stable")
 def stable():
