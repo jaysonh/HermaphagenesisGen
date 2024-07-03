@@ -1,4 +1,5 @@
 from flask import Flask, request
+from flask_cors import CORS
 import requests
 from flask import send_file
 from openai import OpenAI
@@ -21,36 +22,48 @@ def download_file(url, local_filename):
 
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/hello")
 def hello():
     return "hello world"
 
+api_access = { "jayson" : "1234",
+	      "marcin"  : "abcd1234",
+	 	"test"  : "sj324hjn3j24jj23" }
+
+def checkApiAccess(api_key):
+    element_found = False
+    for value in api_access.values():
+        print(f"checking value {value} against {api_key}")
+        if value == api_key:
+            print(f"found api_key {api_key}")
+            element_found = True
+            break
+    return element_found;
 
 @app.route("/")
 def dalle3():
     prompt_txt = request.args.get('prompt')
-    #prompt_txt = "a unique creature with an upside-down large intestine at the top, a single lung beneath it, another intestine under the lung, a liver at the bottom, four distinct sets of small intestines each with two attached stomachs. Visualize this organism in a dense forest and burrow environment, showing an elongated, segmented body, webbed limbs for climbing and burrowing, and keen sensory organs. The scene includes vibrant forest foliage and intricate underground tunnels, with realistic textures and dynamic lighting. High detail, intricate features, lifelike depiction"
+    api_key = request.args.get('key')
+
     print(f"prompt: {prompt_txt}")
+    print(f"key: {api_key}")
 
+    if checkApiAccess(api_key) == True:
+        client = OpenAI()
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt_txt,
+            size="1024x1024",
+            quality="standard",
+            n=1,
+        )
 
-    client = OpenAI()
-    response = client.images.generate(
-        model="dall-e-3",
-        prompt=prompt_txt,
-        size="1024x1024",
-        quality="standard",
-        n=1,
-    )
-
-    image_url = response.data[0].url
-    download_file(image_url, "dalle_img.png")
-#    return image_url 
-#    with open("./dalle_img.png", 'wb') as file:
-#        file.write(response.content)
-    return send_file('dalle_img.png')
-#    return f"Running Dall E 3, url: {image_url}"
-
+        image_url = response.data[0].url
+        download_file(image_url, "dalle_img.png")
+        return send_file('dalle_img.png')
+    return "invalid api key"
 #@app.route("/test")
 #def testing():
 
