@@ -44,6 +44,8 @@ def checkApiAccess(api_key):
 
 @app.route("/")
 def dalle3():
+
+
     prompt_txt = request.args.get('prompt')
     api_key = request.args.get('key')
 
@@ -52,6 +54,45 @@ def dalle3():
 
     if checkApiAccess(api_key) == True:
         client = OpenAI()
+
+#        organism_desc = "a unique amphibious creature with"
+#        prompt_txt = organism_desc + prompt_txt
+
+        assistant = client.beta.assistants.create(
+     	   name="Animal Descriptor",
+           instructions="You describe the phsyical look of an animal",
+    	   tools=[{"type": "code_interpreter"}],
+    	   model="gpt-4-1106-preview",
+        )
+
+        thread = client.beta.threads.create()
+        animal_desc = client.beta.threads.messages.create(
+ 		   thread_id=thread.id,
+    		   role="user",
+    		   content="please describe in one sentence a unique description of an animal",
+		)
+        print(f"ANIMAL DESC: {animal_desc}");
+        run = client.beta.threads.runs.create_and_poll(
+               thread_id=thread.id,
+               assistant_id=assistant.id,
+               instructions="Please address the user as Jane Doe. The user has a premium account.",
+          )
+        
+        print("Run completed with status: " + run.status)
+
+        if run.status == "completed":
+            messages = client.beta.threads.messages.list(thread_id=thread.id)
+        
+        print("messages: ")
+        for message in messages:
+            assert message.content[0].type == "text"
+            print({"role": message.role, "message": message.content[0].text.value})
+       
+        client.beta.assistants.delete(assistant.id)
+
+        organism_desc = message.content[0].text.value
+        prompt_txt = organism_desc + prompt_txt
+
         response = client.images.generate(
             model="dall-e-3",
             prompt=prompt_txt,
