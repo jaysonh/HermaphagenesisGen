@@ -71,28 +71,31 @@ def dalle3():
     		   role="user",
     		   content="please describe in one sentence a unique description of an animal",
 		)
-        print(f"ANIMAL DESC: {animal_desc}");
         run = client.beta.threads.runs.create_and_poll(
                thread_id=thread.id,
                assistant_id=assistant.id,
                instructions="Please address the user as Jane Doe. The user has a premium account.",
           )
         
-        print("Run completed with status: " + run.status)
+        organism_desc ="NULL"
 
         if run.status == "completed":
             messages = client.beta.threads.messages.list(thread_id=thread.id)
-        
-        print("messages: ")
+#        if messages.length > 0:
+#            organism_desc = message.content[0].text.value
+        first_msg = True       
         for message in messages:
-            assert message.content[0].type == "text"
-            print({"role": message.role, "message": message.content[0].text.value})
+            if first_msg == True:
+                organism_desc = message.content[0].text.value
+                first_msg=False
+                assert message.content[0].type == "text"
+                print({"role": message.role, "message": message.content[0].text.value})
        
         client.beta.assistants.delete(assistant.id)
+#       organism_desc = message.content[0].text.value
+        prompt_txt = organism_desc + " with a " + prompt_txt
 
-        organism_desc = message.content[0].text.value
-        prompt_txt = organism_desc + prompt_txt
-
+        print(f"prompt: {prompt_txt}")
         response = client.images.generate(
             model="dall-e-3",
             prompt=prompt_txt,
